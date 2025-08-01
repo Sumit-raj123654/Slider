@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>3D Futuristic Carousel</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      height: 100vh;
+      background: radial-gradient(#000000, #050505);
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .carousel-container {
+      width: 100%;
+      height: 100vh;
+      perspective: 1500px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .carousel {
+      width: 500px;
+      height: 300px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateY(0deg);
+      transition: transform 1s ease-in-out;
+    }
+
+    .carousel img {
+      position: absolute;
+      width: 300px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(255,255,255,0.3), 0 10px 30px rgba(0,0,0,0.5);
+      border: 2px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(2px);
+      transition: transform 1s, opacity 1s;
+      cursor: pointer;
+    }
+
+    .carousel img.active {
+      transform: scale(1.1);
+      z-index: 10;
+      box-shadow: 0 0 40px rgba(0,255,255,0.6);
+      border: 2px solid cyan;
+    }
+
+    .carousel-indicators {
+      position: absolute;
+      bottom: 40px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .carousel-indicators span {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #777;
+      box-shadow: 0 0 8px cyan;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .carousel-indicators span.active {
+      background: cyan;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="carousel-container">
+    <div class="carousel" id="carousel">
+      <img src="https://picsum.photos/id/1015/300/200" alt="1">
+      <img src="https://picsum.photos/id/1016/300/200" alt="2">
+      <img src="https://picsum.photos/id/1018/300/200" alt="3">
+      <img src="https://picsum.photos/id/1020/300/200" alt="4">
+      <img src="https://picsum.photos/id/1024/300/200" alt="5">
+    </div>
+    <div class="carousel-indicators" id="indicators"></div>
+  </div>
+
+  <script>
+    const carousel = document.getElementById('carousel');
+    const images = carousel.querySelectorAll('img');
+    const indicators = document.getElementById('indicators');
+
+    const radius = 400;
+    const rotateAmount = 360 / images.length;
+    let currentIndex = 0;
+
+    function positionImages() {
+      images.forEach((img, i) => {
+        const angle = i * rotateAmount;
+        img.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+        img.classList.remove('active');
+      });
+      images[currentIndex].classList.add('active');
+    }
+
+    function rotateCarousel() {
+      const angle = currentIndex * -rotateAmount;
+      carousel.style.transform = `rotateY(${angle}deg)`;
+      updateIndicators();
+    }
+
+    function updateIndicators() {
+      const dots = indicators.querySelectorAll('span');
+      dots.forEach(dot => dot.classList.remove('active'));
+      dots[currentIndex].classList.add('active');
+    }
+
+    function setupIndicators() {
+      images.forEach((_, i) => {
+        const dot = document.createElement('span');
+        dot.onclick = () => {
+          currentIndex = i;
+          rotateCarousel();
+        };
+        indicators.appendChild(dot);
+      });
+    }
+
+    setupIndicators();
+    positionImages();
+    rotateCarousel();
+
+    // Auto Rotate
+    let interval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % images.length;
+      rotateCarousel();
+    }, 4000);
+
+    carousel.addEventListener('mouseenter', () => clearInterval(interval));
+    carousel.addEventListener('mouseleave', () => {
+      interval = setInterval(() => {
+        currentIndex = (currentIndex + 1) % images.length;
+        rotateCarousel();
+      }, 4000);
+    });
+
+    images.forEach((img, i) => {
+      img.addEventListener('click', () => {
+        currentIndex = i;
+        rotateCarousel();
+      });
+    });
+  </script>
+
+</body>
+</html>

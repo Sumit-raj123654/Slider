@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cyberpunk Neon 3D Carousel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      height: 100vh;
+      overflow: hidden;
+      background: url('https://i.imgur.com/placeholder-bg.png') center/cover no-repeat;
+      /* Replace with your neon grid background or host your own */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: sans-serif;
+    }
+    .wrapper {
+      position: relative;
+      width: 600px;
+      height: 400px;
+      perspective: 1600px;
+    }
+    .carousel {
+      width: 100%; height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 1.2s ease-in-out;
+    }
+    .carousel img {
+      position: absolute;
+      width: 280px; height: 180px;
+      object-fit: cover;
+      border-radius: 16px;
+      box-shadow: 0 0 30px rgba(0,255,255,0.6), 0 20px 40px rgba(0,0,0,0.5);
+      border: 2px solid rgba(0,255,255,0.3);
+      transition: transform 1s, opacity 1s;
+      cursor: pointer;
+      opacity: 0.9;
+    }
+    .carousel img.active {
+      transform: scale(1.15) !important;
+      opacity: 1 !important;
+      z-index: 10;
+    }
+    .indicators {
+      position: absolute; bottom: -50px;
+      left: 50%; transform: translateX(-50%);
+      display: flex; gap: 14px;
+    }
+    .indicators span {
+      width: 14px; height: 14px;
+      background: rgba(0,255,255,0.4);
+      border-radius: 50%;
+      box-shadow: 0 0 12px rgba(0,255,255,0.8);
+      cursor: pointer; transition: 0.3s;
+    }
+    .indicators span.active {
+      background: cyan; transform: scale(1.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="carousel" id="carousel">
+      <img src="https://picsum.photos/id/1025/400/250" alt="">
+      <img src="https://picsum.photos/id/1020/400/250" alt="">
+      <img src="https://picsum.photos/id/1016/400/250" alt="">
+      <img src="https://picsum.photos/id/1035/400/250" alt="">
+      <img src="https://picsum.photos/id/1039/400/250" alt="">
+    </div>
+    <div class="indicators" id="indicators"></div>
+  </div>
+
+  <script>
+    const carousel = document.getElementById('carousel');
+    const imgs = carousel.querySelectorAll('img');
+    const ind = document.getElementById('indicators');
+    const total = imgs.length;
+    const angleStep = 360 / total;
+    let current = 0;
+
+    function position() {
+      imgs.forEach((img, i) => {
+        const theta = i * angleStep;
+        const x = 500 * Math.cos(theta * Math.PI/180);
+        const z = 500 * Math.sin(theta * Math.PI/180);
+        img.style.transform = `translateX(${x}px) translateZ(${z}px) rotateY(${theta}deg)`;
+        img.classList.toggle('active', i === current);
+      });
+      carousel.style.transform = `translateZ(-500px) rotateY(${-current * angleStep}deg)`;
+      updateDots();
+    }
+
+    function updateDots() {
+      ind.querySelectorAll('span').forEach((d,i) => d.classList.toggle('active', i === current));
+    }
+
+    function setupIndicators() {
+      for (let i = 0; i < total; i++) {
+        const dot = document.createElement('span');
+        dot.addEventListener('click', () => {
+          current = i; position(); resetAuto();
+        });
+        ind.appendChild(dot);
+      }
+    }
+
+    imgs.forEach((img,i) => {
+      img.addEventListener('click', () => { current = i; position(); resetAuto(); });
+    });
+
+    let auto = setInterval(() => {
+      current = (current + 1) % total; position();
+    }, 3500);
+
+    function resetAuto() {
+      clearInterval(auto);
+      auto = setInterval(() => {
+        current = (current + 1) % total; position();
+      }, 3500);
+    }
+
+    carousel.addEventListener('mouseenter', () => clearInterval(auto));
+    carousel.addEventListener('mouseleave', () => resetAuto());
+
+    // Initialization
+    setupIndicators();
+    position();
+  </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>3D Killer Image Carousel</title>
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle at center, #000, #111);
+      font-family: sans-serif;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .carousel-wrapper {
+      position: relative;
+      width: 600px;
+      height: 400px;
+      perspective: 1500px;
+    }
+
+    .carousel {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      transform-style: preserve-3d;
+      transition: transform 1s ease;
+    }
+
+    .carousel img {
+      position: absolute;
+      width: 300px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      transition: transform 1s ease, opacity 0.8s ease;
+      cursor: pointer;
+    }
+
+    .indicators {
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+    }
+
+    .indicators span {
+      width: 14px;
+      height: 14px;
+      background: #555;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .indicators span.active {
+      background: #fff;
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+<body>
+
+<div class="carousel-wrapper">
+  <div class="carousel" id="carousel">
+    <img src="https://picsum.photos/id/1015/300/200" alt="1">
+    <img src="https://picsum.photos/id/1016/300/200" alt="2">
+    <img src="https://picsum.photos/id/1018/300/200" alt="3">
+    <img src="https://picsum.photos/id/1020/300/200" alt="4">
+    <img src="https://picsum.photos/id/1024/300/200" alt="5">
+    <img src="https://picsum.photos/id/1027/300/200" alt="6">
+  </div>
+  <div class="indicators" id="indicators"></div>
+</div>
+
+<script>
+  const carousel = document.getElementById("carousel");
+  const images = carousel.querySelectorAll("img");
+  const indicators = document.getElementById("indicators");
+
+  let angle = 0;
+  let current = 0;
+  const total = images.length;
+  const radius = 500;
+
+  function positionImages() {
+    images.forEach((img, i) => {
+      const theta = (360 / total) * i;
+      const rad = theta * (Math.PI / 180);
+      const x = radius * Math.cos(rad);
+      const z = radius * Math.sin(rad);
+      img.style.transform = `translateX(${x}px) translateZ(${z}px) rotateY(${theta}deg)`;
+    });
+  }
+
+  function updateCarousel() {
+    carousel.style.transform = `translateZ(-500px) rotateY(${-angle}deg)`;
+    updateIndicators(current);
+  }
+
+  function updateIndicators(index) {
+    document.querySelectorAll(".indicators span").forEach((dot, i) => {
+      dot.classList.toggle("active", i === index);
+    });
+  }
+
+  function createIndicators() {
+    for (let i = 0; i < total; i++) {
+      const dot = document.createElement("span");
+      dot.addEventListener("click", () => {
+        current = i;
+        angle = (360 / total) * current;
+        updateCarousel();
+      });
+      indicators.appendChild(dot);
+    }
+  }
+
+  images.forEach((img, i) => {
+    img.addEventListener("click", () => {
+      current = i;
+      angle = (360 / total) * current;
+      updateCarousel();
+    });
+  });
+
+  let autoRotate = setInterval(() => {
+    current = (current + 1) % total;
+    angle = (360 / total) * current;
+    updateCarousel();
+  }, 3500);
+
+  carousel.addEventListener("mouseenter", () => clearInterval(autoRotate));
+  carousel.addEventListener("mouseleave", () => {
+    autoRotate = setInterval(() => {
+      current = (current + 1) % total;
+      angle = (360 / total) * current;
+      updateCarousel();
+    }, 3500);
+  });
+
+  // Init
+  positionImages();
+  createIndicators();
+  updateCarousel();
+</script>
+
+</body>
+</html>
